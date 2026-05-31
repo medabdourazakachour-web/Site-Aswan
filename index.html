@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pour Aswan 💚</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green-dark: #001a0a;
+  --green-mid: #002d12;
+  --green-light: #4ade80;
+  --green-pale: #bbf7d0;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--green-dark);
+  color: var(--green-pale);
+  font-family: 'DM Sans', sans-serif;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+#cursor {
+  width: 12px; height: 12px;
+  background: var(--green-light);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  mix-blend-mode: screen;
+  transform: translate(-50%,-50%);
+}
+#cursor-trail {
+  width: 32px; height: 32px;
+  border: 1px solid rgba(74,222,128,0.4);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: left 0.1s ease, top 0.1s ease;
+}
+
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* HERO */
+#hero {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.hero-label {
+  font-size: 11px;
+  letter-spacing: 0.25em;
+  color: var(--green-light);
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.3s forwards;
+}
+
+.hero-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(64px, 14vw, 130px);
+  font-weight: 700;
+  line-height: 0.9;
+  color: #fff;
+  margin: 16px 0;
+  opacity: 0;
+  animation: fadeUp 0.9s 0.5s forwards;
+}
+.hero-title span { color: var(--green-light); font-style: italic; }
+
+.hero-sub {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-size: clamp(16px, 3vw, 21px);
+  color: rgba(187,247,208,0.55);
+  max-width: 440px;
+  line-height: 1.7;
+  opacity: 0;
+  animation: fadeUp 0.9s 0.7s forwards;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  opacity: 0;
+  animation: fadeUp 0.8s 1.3s forwards;
+}
+.scroll-hint span {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(187,247,208,0.35);
+}
+.scroll-line {
+  width: 1px; height: 44px;
+  background: linear-gradient(180deg, var(--green-light), transparent);
+  animation: pulse 1.8s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(22px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* SECTIONS */
+section {
+  position: relative;
+  z-index: 1;
+  padding: 100px 24px;
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+.section-tag {
+  font-size: 10px;
+  letter-spacing: 0.28em;
+  color: var(--green-light);
+  text-transform: uppercase;
+  margin-bottom: 44px;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.7s, transform 0.7s;
+}
+.section-tag.vis { opacity:1; transform:translateY(0); }
+
+/* OVERTHINK SECTION */
+#calm-section { text-align: center; }
+
+.calm-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(30px, 6vw, 52px);
+  color: #fff;
+  line-height: 1.2;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s, transform 0.8s;
+}
+.calm-title.vis { opacity:1; transform:translateY(0); }
+
+.calm-intro {
+  font-size: 15px;
+  color: rgba(187,247,208,0.5);
+  margin-bottom: 52px;
+  opacity: 0;
+  transition: opacity 0.8s 0.2s;
+}
+.calm-intro.vis { opacity:1; }
+
+.calm-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.calm-card {
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(74,222,128,0.15);
+  border-radius: 16px;
+  padding: 28px 32px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s, transform 0.25s;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: opacity 0.6s, transform 0.6s, background 0.3s, border-color 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.calm-card.vis { opacity:1; transform:translateX(0); }
+.calm-card:hover {
+  background: rgba(74,222,128,0.07);
+  border-color: rgba(74,222,128,0.4);
+}
+.calm-card.open {
+  background: rgba(74,222,128,0.08);
+  border-color: rgba(74,222,128,0.5);
+}
+
+.calm-card-q {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: #dcfce7;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.calm-card-q::before {
+  content: '+';
+  font-size: 22px;
+  color: var(--green-light);
+  font-weight: 300;
+  flex-shrink: 0;
+  transition: transform 0.3s;
+  margin-top: 2px;
+}
+.calm-card.open .calm-card-q::before { transform: rotate(45deg); }
+
+.calm-card-a {
+  font-size: 15px;
+  color: rgba(187,247,208,0.7);
+  line-height: 1.8;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.5s ease, padding 0.3s;
+  padding-left: 36px;
+}
+.calm-card.open .calm-card-a {
+  max-height: 200px;
+  padding-top: 14px;
+}
+
+/* LETTER SECTION */
+#letter-section {}
+
+.letter-card {
+  background: rgba(255,255,255,0.03);
+  border: 0.5px solid rgba(74,222,128,0.2);
+  border-radius: 24px;
+  padding: 56px 48px;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.9s 0.2s, transform 0.9s 0.2s;
+}
+.letter-card.vis { opacity:1; transform:translateY(0); }
+
+.letter-card::after {
+  content: '\201C';
+  position: absolute;
+  top: 10px; left: 32px;
+  font-family: 'Playfair Display', serif;
+  font-size: 130px;
+  color: rgba(74,222,128,0.06);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.letter-name {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: var(--green-light);
+  margin-bottom: 28px;
+  letter-spacing: 0.04em;
+}
+
+.letter-body {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(17px, 2.5vw, 21px);
+  line-height: 2;
+  color: #dcfce7;
+  position: relative;
+  z-index: 1;
+}
+.letter-body p { margin-bottom: 26px; }
+.letter-body p:last-child { margin-bottom: 0; }
+
+.letter-highlight {
+  color: #fff;
+  font-weight: 700;
+  position: relative;
+}
+.letter-highlight::after {
+  content: '';
+  position: absolute;
+  bottom: 2px; left: 0; right: 0;
+  height: 2px;
+  background: var(--green-light);
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.6s 0.5s;
+}
+.letter-card.vis .letter-highlight::after { transform: scaleX(1); }
+
+.letter-sig {
+  margin-top: 40px;
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: 17px;
+  color: var(--green-light);
+  text-align: right;
+}
+
+/* WORDS SECTION */
+#words-section { text-align: center; }
+
+.words-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 48px);
+  color: #fff;
+  margin-bottom: 48px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s, transform 0.8s;
+}
+.words-title.vis { opacity:1; transform:translateY(0); }
+
+.words-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  max-width: 580px;
+  margin: 0 auto 40px;
+}
+
+.word-pill {
+  padding: 10px 22px;
+  border-radius: 50px;
+  border: 0.5px solid rgba(74,222,128,0.3);
+  background: rgba(74,222,128,0.04);
+  color: var(--green-pale);
+  font-size: 14px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  opacity: 0;
+  transform: scale(0.88);
+  transition: opacity 0.5s, transform 0.5s, background 0.25s, border-color 0.25s, color 0.25s;
+}
+.word-pill.vis { opacity:1; transform:scale(1); }
+.word-pill:hover, .word-pill.active {
+  background: rgba(74,222,128,0.16);
+  border-color: var(--green-light);
+  color: #fff;
+  transform: scale(1.07);
+}
+
+.word-meaning {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(17px, 3vw, 24px);
+  color: rgba(187,247,208,0.8);
+  line-height: 1.7;
+  max-width: 500px;
+  margin: 0 auto;
+  min-height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.45s forwards;
+}
+@keyframes fadeIn {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* CONSTELLATION */
+#constellation-section { text-align: center; }
+.const-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 5vw, 44px);
+  color: #fff;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s, transform 0.8s;
+}
+.const-title.vis { opacity:1; transform:translateY(0); }
+.const-sub {
+  font-size: 14px;
+  color: rgba(187,247,208,0.45);
+  margin-bottom: 36px;
+  opacity: 0;
+  transition: opacity 0.8s 0.2s;
+}
+.const-sub.vis { opacity:1; }
+
+#star-canvas {
+  width: 100%;
+  max-width: 600px;
+  height: 280px;
+  cursor: crosshair;
+  border-radius: 18px;
+  border: 0.5px solid rgba(74,222,128,0.15);
+  background: rgba(0,0,0,0.25);
+  display: block;
+  margin: 0 auto;
+  opacity: 0;
+  transition: opacity 0.8s 0.3s;
+}
+#star-canvas.vis { opacity:1; }
+.star-hint { font-size:11px; color:rgba(187,247,208,0.3); margin-top:12px; letter-spacing:0.08em; }
+
+/* FINAL */
+#final-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 24px;
+}
+.final-heart {
+  font-size: 80px;
+  line-height: 1;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 1s, transform 1s;
+  animation: none;
+}
+.final-heart.vis {
+  opacity:1; transform:scale(1);
+  animation: hb 2s 1s infinite;
+}
+@keyframes hb {
+  0%,100%{transform:scale(1)}
+  14%{transform:scale(1.12)}
+  28%{transform:scale(1)}
+  42%{transform:scale(1.06)}
+}
+.final-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(40px, 9vw, 88px);
+  color: #fff;
+  line-height: 1.05;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s 0.3s, transform 0.9s 0.3s;
+}
+.final-title.vis { opacity:1; transform:translateY(0); }
+.final-sub {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-size: clamp(15px, 2.5vw, 20px);
+  color: rgba(187,247,208,0.55);
+  max-width: 380px;
+  line-height: 1.8;
+  opacity: 0;
+  transition: opacity 0.9s 0.6s;
+}
+.final-sub.vis { opacity:1; }
+
+/* mobile */
+@media(max-width:600px){
+  .letter-card { padding:32px 22px; }
+  #cursor,#cursor-trail { display:none; }
+  body { cursor:auto; }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-trail"></div>
+<canvas id="bg-canvas"></canvas>
+
+<!-- HERO -->
+<div id="hero">
+  <p class="hero-label">Pour toi, Aswan</p>
+  <h1 class="hero-title">Tu n'es<br>pas <span>seule.</span></h1>
+  <p class="hero-sub">Ce site existe parce que quelqu'un tient à toi plus que les mots peuvent le dire.</p>
+  <div class="scroll-hint">
+    <span>Continue</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- CALM SECTION -->
+<section id="calm-section">
+  <p class="section-tag">01 — Quand tu overthinks</p>
+  <h2 class="calm-title">Pour les pensées qui tournent en boucle.</h2>
+  <p class="calm-intro">Clique sur ce que tu ressens.</p>
+  <div class="calm-cards" id="calm-cards"></div>
+</section>
+
+<!-- LETTER -->
+<section id="letter-section">
+  <p class="section-tag">02 — Un message pour toi</p>
+  <div class="letter-card" id="letter-card">
+    <p class="letter-name">Pour Aswan,</p>
+    <div class="letter-body">
+      <p>Je sais que parfois les journées peuvent être lourdes, que certains jours le tunnel est sombre… mais y a toujours la lumière au bout du tunnel, et demain sera belle.</p>
+      <p>Tu es la chose la plus lumineuse dans mon quotidien. Pas besoin de raison particulière. Juste toi — adiga xabibit — ta façon d'être, ta présence, les petites choses que tu fais sans y penser.</p>
+      <p><span class="letter-highlight">Même quand tu te sens pas bien, je suis avec toi, toujours à tes côtés.</span></p>
+      <p>Tu es aimée, pour de vrai et énormément mon cœur.</p>
+    </div>
+    <p class="letter-sig">avec tout mon amour 💚</p>
+  </div>
+</section>
+
+<!-- WORDS -->
+<section id="words-section">
+  <p class="section-tag">03 — Ce que tu es</p>
+  <h2 class="words-title">Des mots qui te décrivent, Aswan.</h2>
+  <div class="words-grid" id="words-grid"></div>
+  <div id="word-display"><p class="word-meaning" style="color:rgba(187,247,208,0.3)">Clique sur un mot.</p></div>
+</section>
+
+<!-- CONSTELLATION -->
+<section id="constellation-section">
+  <p class="section-tag">04 — Notre ciel</p>
+  <h2 class="const-title">Dessine notre constellation.</h2>
+  <p class="const-sub">Clique pour placer des étoiles. Elles se connectent toutes seules.</p>
+  <canvas id="star-canvas" width="600" height="280"></canvas>
+  <p class="star-hint">Double-clique pour recommencer</p>
+</section>
+
+<!-- FINAL -->
+<section id="final-section">
+  <div class="final-heart">💚</div>
+  <h2 class="final-title">Je t'aime,<br>Aswan.</h2>
+  <p class="final-sub">Pas seulement quand tu vas bien. Tout le temps. Sans condition.</p>
+</section>
+
+<script>
+// cursor
+var cur = document.getElementById('cursor');
+var trail = document.getElementById('cursor-trail');
+document.addEventListener('mousemove', function(e){
+  cur.style.left = e.clientX+'px';
+  cur.style.top  = e.clientY+'px';
+  setTimeout(function(){
+    trail.style.left = e.clientX+'px';
+    trail.style.top  = e.clientY+'px';
+  }, 80);
+});
+
+// bg particles
+var bgC = document.getElementById('bg-canvas');
+var bgX = bgC.getContext('2d');
+var pts = [];
+function resBg(){ bgC.width=window.innerWidth; bgC.height=window.innerHeight; }
+resBg();
+window.addEventListener('resize', resBg);
+for(var i=0;i<90;i++) pts.push({
+  x:Math.random()*window.innerWidth,
+  y:Math.random()*window.innerHeight,
+  r:Math.random()*1.2+0.2,
+  vx:(Math.random()-.5)*.14,
+  vy:(Math.random()-.5)*.14,
+  a:Math.random(), da:(Math.random()-.5)*.005
+});
+(function animBg(){
+  bgX.clearRect(0,0,bgC.width,bgC.height);
+  pts.forEach(function(p){
+    p.x+=p.vx; p.y+=p.vy; p.a+=p.da;
+    if(p.a<0||p.a>1) p.da*=-1;
+    if(p.x<0) p.x=bgC.width; if(p.x>bgC.width) p.x=0;
+    if(p.y<0) p.y=bgC.height; if(p.y>bgC.height) p.y=0;
+    bgX.beginPath(); bgX.arc(p.x,p.y,p.r,0,Math.PI*2);
+    bgX.fillStyle='rgba(180,255,200,'+(p.a*.35)+')'; bgX.fill();
+  });
+  requestAnimationFrame(animBg);
+})();
+
+// scroll reveal
+var obs = new IntersectionObserver(function(entries){
+  entries.forEach(function(e){ if(e.isIntersecting) e.target.classList.add('vis'); });
+},{ threshold:0.12 });
+document.querySelectorAll('.section-tag,.calm-title,.calm-intro,.letter-card,.words-title,.const-title,.const-sub,#star-canvas,.final-heart,.final-title,.final-sub').forEach(function(el){ obs.observe(el); });
+
+// calm cards
+var calmData = [
+  {
+    q: "Les pensées tournent et tu n'arrives pas à t'arrêter.",
+    a: "Tu n'es pas tes pensées. Tu es celle qui les observe. Une seule chose à la fois — juste maintenant, juste cette respiration."
+  },
+  {
+    q: "Tu penses que tu déranges ou que tu es trop.",
+    a: "Tu n'es pas trop. Les gens qui t'aiment veulent justement cette version-là de toi — celle qui ressent fort."
+  },
+  {
+    q: "Tu t'en veux pour des choses que tu ne contrôles pas.",
+    a: "Ce que tu portes est lourd. C'est normal de te sentir fatiguée. Tu n'as rien à prouver ce soir."
+  },
+  {
+    q: "Tu as peur que demain soit aussi dur qu'aujourd'hui.",
+    a: "Demain sera un autre cerveau, une autre lumière. Tu as déjà traversé des nuits difficiles. Tu es encore là."
+  },
+  {
+    q: "Tu te sens seule avec tout ça.",
+    a: "Tu n'es pas seule. Il y a quelqu'un qui pense à toi en ce moment même, et qui veut juste que tu ailles mieux."
+  }
+];
+
+var calmContainer = document.getElementById('calm-cards');
+var cardObs = new IntersectionObserver(function(entries){
+  if(entries[0].isIntersecting){
+    document.querySelectorAll('.calm-card').forEach(function(c,i){
+      setTimeout(function(){ c.classList.add('vis'); }, i*100);
+    });
+  }
+},{ threshold:0.1 });
+
+calmData.forEach(function(d){
+  var card = document.createElement('div');
+  card.className = 'calm-card';
+  card.innerHTML = '<div class="calm-card-q">'+d.q+'</div><div class="calm-card-a">'+d.a+'</div>';
+  card.addEventListener('click', function(){
+    var isOpen = card.classList.contains('open');
+    document.querySelectorAll('.calm-card').forEach(function(c){ c.classList.remove('open'); });
+    if(!isOpen) card.classList.add('open');
+  });
+  calmContainer.appendChild(card);
+});
+cardObs.observe(calmContainer);
+
+// words
+var words = [
+  { label:'Lumineuse',      meaning:'Tu éclaires les pièces sans même le savoir.' },
+  { label:'Courageuse',     meaning:'Tu portes des choses lourdes avec une grâce rare.' },
+  { label:'Aimée',          meaning:'Pour de vrai. Énormément. Sans condition.' },
+  { label:'Forte',          meaning:'Même quand tu te sens fragile, tu tiens.' },
+  { label:'Belle',          meaning:'De partout. Dedans et dehors.' },
+  { label:'Irremplaçable',  meaning:"Il n'y a personne comme toi. Vraiment personne." },
+  { label:'Précieuse',      meaning:'Tu mérites tout le soin du monde.' },
+  { label:'Entière',        meaning:'Ta façon de ressentir fort est une qualité, pas un défaut.' },
+];
+
+var grid = document.getElementById('words-grid');
+var display = document.getElementById('word-display');
+words.forEach(function(w,i){
+  var p = document.createElement('button');
+  p.className='word-pill';
+  p.textContent=w.label;
+  p.style.transitionDelay=(i*0.055)+'s';
+  p.addEventListener('click',function(){
+    document.querySelectorAll('.word-pill').forEach(function(x){ x.classList.remove('active'); });
+    p.classList.add('active');
+    display.innerHTML='<p class="word-meaning">'+w.meaning+'</p>';
+  });
+  grid.appendChild(p);
+});
+var wordObs = new IntersectionObserver(function(entries){
+  if(entries[0].isIntersecting) document.querySelectorAll('.word-pill').forEach(function(p){ p.classList.add('vis'); });
+},{ threshold:0.2 });
+wordObs.observe(grid);
+
+// constellation
+var sc = document.getElementById('star-canvas');
+var sctx = sc.getContext('2d');
+var starPts = [];
+function drawStars(){
+  sctx.clearRect(0,0,sc.width,sc.height);
+  if(starPts.length>1){
+    sctx.strokeStyle='rgba(74,222,128,0.22)';
+    sctx.lineWidth=0.8;
+    sctx.beginPath();
+    sctx.moveTo(starPts[0].x,starPts[0].y);
+    for(var i=1;i<starPts.length;i++) sctx.lineTo(starPts[i].x,starPts[i].y);
+    sctx.stroke();
+  }
+  starPts.forEach(function(p){
+    var g=sctx.createRadialGradient(p.x,p.y,0,p.x,p.y,10);
+    g.addColorStop(0,'rgba(74,222,128,0.5)');
+    g.addColorStop(1,'rgba(74,222,128,0)');
+    sctx.fillStyle=g; sctx.beginPath(); sctx.arc(p.x,p.y,10,0,Math.PI*2); sctx.fill();
+    sctx.fillStyle='#4ade80'; sctx.beginPath(); sctx.arc(p.x,p.y,3,0,Math.PI*2); sctx.fill();
+  });
+}
+function getPos(e,touch){
+  var r=sc.getBoundingClientRect();
+  var sx=sc.width/r.width, sy=sc.height/r.height;
+  var src=touch||e;
+  return {x:(src.clientX-r.left)*sx, y:(src.clientY-r.top)*sy};
+}
+sc.addEventListener('click',function(e){ starPts.push(getPos(e)); drawStars(); });
+sc.addEventListener('touchstart',function(e){ e.preventDefault(); starPts.push(getPos(e,e.touches[0])); drawStars(); });
+sc.addEventListener('dblclick',function(){ starPts=[]; sctx.clearRect(0,0,sc.width,sc.height); });
+
+// petals
+var ps=document.createElement('style');
+ps.textContent='@keyframes pFall{0%{opacity:0;transform:translateY(0) rotate(0deg)}10%{opacity:1}90%{opacity:.7}100%{opacity:0;transform:translateY(105vh) rotate(380deg)}}';
+document.head.appendChild(ps);
+function spawnPetal(){
+  var el=document.createElement('div');
+  var emojis=['🌸','🌺','🌷','💚','✨','🍀'];
+  var dur=6+Math.random()*5;
+  el.style.cssText='position:fixed;top:-24px;pointer-events:none;z-index:2;opacity:0;font-size:'+(13+Math.random()*10)+'px;left:'+(Math.random()*100)+'vw;animation:pFall '+dur+'s '+(Math.random()*2)+'s linear both;';
+  el.textContent=emojis[Math.floor(Math.random()*emojis.length)];
+  document.body.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); },(dur+3)*1000);
+}
+setInterval(spawnPetal,2000);
+</script>
+</body>
+</html>
